@@ -2,22 +2,30 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import getMusics from '../services/musicsAPI';
 import MusicCard from './musicCard';
+import { getFavoriteSongs } from '../services/favoriteSongsAPI';
 
 class Album extends React.Component {
   constructor() {
     super();
     this.state = {
       songs: [],
+      favoriteSongs: [],
       artistName: '',
       albumName: '',
+      loading: true,
     };
   }
 
   componentDidMount = async () => {
     const { match: { params: { id } } } = this.props;
     const GET_API = await getMusics(id);
-    const index = 0;
+    const GET_API_FAVORITE_SONGS = await getFavoriteSongs();
+    this.setState({
+      favoriteSongs: GET_API_FAVORITE_SONGS,
+      loading: false,
+    });
 
+    const index = 0;
     this.setState({
       songs: GET_API,
       artistName: GET_API[index].artistName,
@@ -26,7 +34,8 @@ class Album extends React.Component {
   }
 
   render() {
-    const { songs, artistName, albumName } = this.state;
+    const { songs, artistName, albumName, favoriteSongs, loading } = this.state;
+    if (loading) return <p>Carregando...</p>;
     return (
       <div data-testid="page-album">
 
@@ -39,6 +48,7 @@ class Album extends React.Component {
             previewUrl={ element.previewUrl }
             trackName={ element.trackName }
             trackId={ element.trackId }
+            checkFavoriteSongs={ favoriteSongs }
           />
         ))}
 
